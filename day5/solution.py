@@ -36,70 +36,62 @@ def part1(ingredients_ranges, ingredient_ids):
     print("Result: ", fresh)
 
 def part2(ingredients_ranges):
-
-    combined_ranges = ingredients_ranges
+    combined_ranges = set(ingredients_ranges)
 
     while True:
-        new_ranges = []
-        merged_indices = []
 
-        print("Start: ", combined_ranges)
+        new_combined = set()
+        merged_amount = 0
 
-        for i1, r1 in enumerate(combined_ranges):
+        for r1 in combined_ranges:
             got_merged = False
-            for i2, r2 in enumerate(combined_ranges):
+            for r2 in combined_ranges:
+                if r1 != r2:
+                    l1, h1 = int(r1.split("-")[0]), int(r1.split("-")[1])
+                    l2, h2 = int(r2.split("-")[0]), int(r2.split("-")[1])
 
-                if i1 in merged_indices or i2 in merged_indices or i1 == i2:
-                    continue
-
-                l1, h1 = int(r1.split("-")[0]), int(r1.split("-")[1])
-                l2, h2 = int(r2.split("-")[0]), int(r2.split("-")[1])
-
-                print(l1, h1, l2, h2)
-                if l1 <= l2 and h1 >= h2:
-                    print("ONE")
-                    new_ranges.append(str(l1) + "-" + str(h1))
-                    merged_indices.append(i1)
-                    merged_indices.append(i2)
-                    got_merged = True
-                elif l2 <= l1 and h2 >= h1:
-                    print("TWO")
-                    new_ranges.append(str(l2) + "-" + str(h2))
-                    merged_indices.append(i1)
-                    merged_indices.append(i2)
-                    got_merged = True
-                elif l1 <= l2 and h1 >= l2 and h1 <= h2:
-                    print("THREE")
-                    new_ranges.append(str(l1) + "-" + str(h2))
-                    print("Added: ", new_ranges[len(new_ranges)-1])
-                    merged_indices.append(i1)
-                    merged_indices.append(i2)
-                    got_merged = True
-                elif l2 <= l1 and h2 >= l1 and h2 <= h1:
-                    print("FOUR")
-                    new_ranges.append(str(l2) + "-" + str(h1))
-                    merged_indices.append(i1)
-                    merged_indices.append(i2)
-                    got_merged = True
+                    # R1 covers R2
+                    if l1 <= l2 and h1 >= h2:
+                        new_combined.add(r1)
+                        got_merged = True
+                        merged_amount += 1
+                        break
+                    # R2 covers R1
+                    elif l2 <= l1 and h2 >= h1:
+                        new_combined.add(r2)
+                        got_merged = True
+                        merged_amount += 1
+                        break
+                    # R1 overlaps from left side
+                    elif h1 >= l2 and h1 <= h2:
+                        new_combined.add(str(l1)+"-"+str(h2))
+                        got_merged = True
+                        merged_amount += 1
+                        break
+                    # R1 overlaps from right side
+                    elif l1 >= l2 and l1 <= h2:
+                        new_combined.add(str(l2)+"-"+str(h1))
+                        got_merged = True
+                        merged_amount += 1
+                        break
+            
             if not got_merged:
-                new_ranges.append(str(l1) + "-" + str(h1))
-                merged_indices.append(i1)
-        print("End: ", new_ranges)
-        print("Merged: ", merged_indices)
-
-        if len(merged_indices) == 0:
+                new_combined.add(r1)
+        
+        if merged_amount == 0:
             break
-        else:
-            combined_ranges = new_ranges
-                
-    print(combined_ranges)
+
+        combined_ranges = new_combined
+        
+    print("Combined: ", combined_ranges)
 
     total = 0
+    
     for c in combined_ranges:
         low, high = int(c.split("-")[0]), int(c.split("-")[1])
         this_total = high - low + 1
         #print("This total ", this_total)
-        total += high - low + 1
+        total += this_total
 
     print("Result ", total)
-part2(example_ingredients[0])
+part2(real_ingredients[0])
